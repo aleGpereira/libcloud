@@ -4,10 +4,10 @@ from libcloud.utils.py3 import PY3, b
 
 
 __all__ = [
-        'API_HOST',
-        'VultrConnection',
-        'VultrException',
-        'VultrResponse',
+    'API_HOST',
+    'VultrConnection',
+    'VultrException',
+    'VultrResponse',
 ]
 
 # Endpoint for the Vultr API
@@ -22,11 +22,15 @@ class VultrResponse(JsonResponse):
     ERROR_CODE_MAP = {
 
         400: "Invalid API location. Check the URL that you are using.",
-        403: "Invalid or missing API key. Check that your API key is present and matches your assigned key.",
-        405: "Invalid HTTP method. Check that the method (POST|GET) matches what the documentation indicates.",
-        412: "Request failed. Check the response body for a more detailed description.",
+        403: "Invalid or missing API key. Check that your API key is present" +
+             " and matches your assigned key.",
+        405: "Invalid HTTP method. Check that the method (POST|GET) matches" +
+             " what the documentation indicates.",
+        412: "Request failed. Check the response body for a more detailed" +
+             " description.",
         500: "Internal server error. Try again at a later time.",
-        503: "Rate limit hit. API requests are limited to an average of 1/s. Try your request again later.",
+        503: "Rate limit hit. API requests are limited to an average of 1/s." +
+             " Try your request again later.",
 
     }
 
@@ -44,12 +48,12 @@ class VultrResponse(JsonResponse):
 
         else:
             self.body = self._decompress_response(body=response.read(),
-                    headers=self.headers)
+                                                  headers=self.headers)
 
         if PY3:
             self.body = b(self.body).decode('utf-8')
 
-        self.objects, self.errors  = self.parse_body()
+        self.objects, self.errors = self.parse_body()
         if not self.success():
             raise self._make_excp(self.errors[0])
 
@@ -80,7 +84,6 @@ class VultrResponse(JsonResponse):
 
         return VultrException(error['ERRORCODE'], error['ERRORMESSAGE'])
 
-
     def success(self):
 
         return len(self.errors) == 0
@@ -92,7 +95,6 @@ class VultrConnection(ConnectionKey):
     """
     host = API_HOST
     responseCls = VultrResponse
-
 
     def add_default_params(self, params):
         """

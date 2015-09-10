@@ -2,9 +2,8 @@ from libcloud.utils.py3 import urllib
 from libcloud.common.vultr import VultrConnection, VultrResponse
 from libcloud.dns.base import DNSDriver, Zone, Record
 from libcloud.dns.types import ZoneDoesNotExistError, RecordDoesNotExistError
-from libcloud.dns.types import ZoneAlreadyExistsError,RecordAlreadyExistsError
+from libcloud.dns.types import ZoneAlreadyExistsError, RecordAlreadyExistsError
 from libcloud.dns.types import Provider, RecordType
-
 
 
 class ZoneRequiredException(Exception):
@@ -21,7 +20,6 @@ class VultrDNSConnection(VultrConnection):
 
 class VultrDNSDriver(DNSDriver):
 
-
     type = Provider.VULTR
     name = 'Vultr DNS'
     website = 'http://www.vultr.com/'
@@ -29,14 +27,14 @@ class VultrDNSDriver(DNSDriver):
 
     RECORD_TYPE_MAP = {
 
-            RecordType.A:'A',
-            RecordType.AAAA:'AAAA',
-            RecordType.TXT:'TXT',
-            RecordType.CNAME:'CNAME',
-            RecordType.MX:'MX',
-            RecordType.NS:'NS',
-            RecordType.SRV:'SRV',
-            }
+        RecordType.A: 'A',
+        RecordType.AAAA: 'AAAA',
+        RecordType.TXT: 'TXT',
+        RecordType.CNAME: 'CNAME',
+        RecordType.MX: 'MX',
+        RecordType.NS: 'NS',
+        RecordType.SRV: 'SRV',
+    }
 
     def _to_zone(self, item):
         """
@@ -47,10 +45,10 @@ class VultrDNSDriver(DNSDriver):
         :rtype: :instance: `Zone`
         """
         type = 'master'
-        extra = {'date_created':item['date_created']}
+        extra = {'date_created': item['date_created']}
 
-        zone = Zone(id=item['domain'],domain=item['domain'],driver=self,
-                type=type, ttl=None,extra=extra)
+        zone = Zone(id=item['domain'], domain=item['domain'], driver=self,
+                    type=type, ttl=None, extra=extra)
 
         return zone
 
@@ -76,8 +74,8 @@ class VultrDNSDriver(DNSDriver):
             extra['priority'] = item['priority']
 
         type = self._string_to_record_type(item['type'])
-        record = Record(id=item['RECORDID'],name=item['name'],type=type,
-                data=item['data'],zone=zone,driver=self, extra=extra)
+        record = Record(id=item['RECORDID'], name=item['name'], type=type,
+                        data=item['data'], zone=zone, driver=self, extra=extra)
 
         return record
 
@@ -88,15 +86,14 @@ class VultrDNSDriver(DNSDriver):
 
         return records
 
-
     def list_zones(self):
         """
        Function that lists zones.
         """
         action = '/v1/dns/list'
-        params = {'api_key':self.key}
+        params = {'api_key': self.key}
         response, errors = self.connection.request(action=action,
-                    params=params).parse_body()
+                                                   params=params).parse_body()
         zones = self._to_zones(response[0])
 
         return zones
@@ -112,13 +109,14 @@ class VultrDNSDriver(DNSDriver):
         ret_zone = None
 
         action = '/v1/dns/list'
-        params = {'api_key':self.key}
+        params = {'api_key': self.key}
         response, errors = self.connection.request(action=action,
-                    params=params).parse_body()
+                                                   params=params).parse_body()
         zones = self._to_zones(response[0])
 
         if not self.zone_exists(zone_id, zones):
-            raise ZoneDoesNotExistError(value=None,zone_id=zone_id,driver=self)
+            raise ZoneDoesNotExistError(value=None, zone_id=zone_id,
+                                        driver=self)
 
         for zone in zones:
             if zone_id == zone.domain:
@@ -141,8 +139,9 @@ class VultrDNSDriver(DNSDriver):
         zone = self.get_zone(zone_id=zone_id)
         records = self.list_records(zone=zone)
 
-        if not self.record_exists(record_id,records):
-            raise RecordDoesNotExistError(value='', driver=self, record_id=record_id)
+        if not self.record_exists(record_id, records):
+            raise RecordDoesNotExistError(value='', driver=self,
+                                          record_id=record_id)
 
         for record in records:
             if record_id == record.id:
@@ -164,17 +163,16 @@ class VultrDNSDriver(DNSDriver):
         zones = self.list_zones()
 
         if not self.zone_exists(zone.domain, zones):
-            raise ZoneDoesNotExistError(value='', driver=self, zone_id=
-                    zone.domain)
+            raise ZoneDoesNotExistError(value='', driver=self,
+                                        zone_id=zone.domain)
 
         action = '/v1/dns/records'
-        params = {'domain':zone.domain}
+        params = {'domain': zone.domain}
         response, errors = self.connection.request(action=action,
-                    params=params).parse_body()
+                                                   params=params).parse_body()
         records = self._to_records(response[0], zone=zone)
 
         return records
-
 
     def create_zone(self, zone_id, type='master', ttl=None, extra={}):
         """
@@ -188,59 +186,62 @@ class VultrDNSDriver(DNSDriver):
         if extra and extra.get('serverip'):
             serverip = extra['serverip']
 
-
-        params = {'api_key':self.key}
-        data = urllib.urlencode({'domain':zone_id,'serverip':serverip})
+        params = {'api_key': self.key}
+        data = urllib.urlencode({'domain': zone_id, 'serverip': serverip})
         action = '/v1/dns/create_domain'
         zones = self.list_zones()
         if self.zone_exists(zone_id, zones):
-            raise ZoneAlreadyExistsError(value='', driver=self, zone_id=zone_id)
+            raise ZoneAlreadyExistsError(value='', driver=self,
+                                         zone_id=zone_id)
 
-        self.connection.request(params=params,action=action,data=data,
-                method='POST')
-        zone = Zone(id=zone_id,domain=zone_id,type=type,ttl=ttl,
-                driver=self,extra=extra)
+        self.connection.request(params=params, action=action, data=data,
+                                method='POST')
+        zone = Zone(id=zone_id, domain=zone_id, type=type, ttl=ttl,
+                    driver=self, extra=extra)
 
         return zone
 
     def delete_zone(self, zone):
 
         action = '/v1/dns/delete_domain'
-        params = {'api_key':self.key}
-        data = urllib.urlencode({'domain':zone.domain})
+        params = {'api_key': self.key}
+        data = urllib.urlencode({'domain': zone.domain})
         zones = self.list_zones()
         if not self.zone_exists(zone.domain, zones):
-            raise ZoneDoesNotExistError(value='', driver=self, zone_id=zone.domain)
+            raise ZoneDoesNotExistError(value='', driver=self,
+                                        zone_id=zone.domain)
 
-        response = self.connection.request(params=params,action=action,
-                data=data,method='POST')
+        response = self.connection.request(params=params, action=action,
+                                           data=data, method='POST')
 
         return response.status == 200
 
     def delete_record(self, record):
 
         action = '/v1/dns/delete_record'
-        params = {'api_key':self.key}
-        data = urllib.urlencode({'RECORDID':record.id, 'domain':record.zone.domain})
+        params = {'api_key': self.key}
+        data = urllib.urlencode({'RECORDID': record.id,
+                                 'domain': record.zone.domain})
 
         zone_records = self.list_records(record.zone)
         if not self.record_exists(record.id, zone_records):
-            raise RecordDoesNotExistError(value='', driver=self, record_id=record.id)
+            raise RecordDoesNotExistError(value='', driver=self,
+                                          record_id=record.id)
 
         response = self.connection.request(action=action, params=params,
-                data=data, method='POST')
+                                           data=data, method='POST')
 
         return response.status == 200
 
     def create_record(self, name, zone, type, data, extra={}):
         ret_record = None
         old_records_list = self.list_records(zone=zone)
-        #check if record already exists
-        #if exists raise RecordAlreadyExistsError
+        # check if record already exists
+        # if exists raise RecordAlreadyExistsError
         for record in old_records_list:
-            if record.name == name and  record.data == data:
+            if record.name == name and record.data == data:
                 raise RecordAlreadyExistsError(value='', driver=self,
-                        record_id=record.id)
+                                               record_id=record.id)
 
         if extra and extra.get('priority'):
             priority = int(extra['priority'])
@@ -248,24 +249,23 @@ class VultrDNSDriver(DNSDriver):
         MX = self.RECORD_TYPE_MAP.get('MX')
         SRV = self.RECORD_TYPE_MAP.get('SRV')
 
-        post_data = {'domain':zone.domain, 'name':name,
-                'type':self.RECORD_TYPE_MAP.get('type'), 'data':data}
-
+        post_data = {'domain': zone.domain, 'name': name,
+                     'type': self.RECORD_TYPE_MAP.get('type'), 'data': data}
 
         if type == MX or type == SRV:
             post_data['priority'] = priority
 
-
-        post_data = {'domain':zone.domain, 'name':name,
-                'type':self.RECORD_TYPE_MAP.get(type), 'data':data}
-
+        post_data = {'domain': zone.domain, 'name': name,
+                     'type': self.RECORD_TYPE_MAP.get(type), 'data': data}
 
         encoded_data = urllib.urlencode(post_data)
-        params = {'api_key':self.key}
+        params = {'api_key': self.key}
         action = '/v1/dns/create_record'
 
         response, errors = self.connection.request(action=action,
-                params=params, data=encoded_data,method='POST').parse_body()
+                                                   params=params,
+                                                   data=encoded_data,
+                                                   method='POST').parse_body()
         updated_zone_records = zone.list_records()
 
         for record in updated_zone_records:
@@ -299,4 +299,3 @@ class VultrDNSDriver(DNSDriver):
             record_ids.append(record.id)
 
         return record_id in record_ids
-

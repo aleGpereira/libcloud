@@ -15,12 +15,13 @@ class VultrTests(unittest.TestCase):
     def setUp(self):
         VultrMockHttp.type = None
         VultrDNSDriver.connectionCls.conn_classes = (
-                None, VultrMockHttp)
+            None, VultrMockHttp)
         self.driver = VultrDNSDriver(*VULTR_PARAMS)
-        self.test_zone = Zone(id='test.com', type='master', ttl=None, domain=
-                'test.com', extra={}, driver=self)
+        self.test_zone = Zone(id='test.com', type='master', ttl=None,
+                              domain='test.com', extra={}, driver=self)
         self.test_record = Record(id='31', type=RecordType.A, name='test',
-                zone=self.test_zone, data='127.0.0.1', driver=self,extra={})
+                                  zone=self.test_zone, data='127.0.0.1',
+                                  driver=self, extra={})
 
     def test_list_zones_empty(self):
         VultrMockHttp.type = 'EMPTY_ZONES_LIST'
@@ -76,7 +77,7 @@ class VultrTests(unittest.TestCase):
 
     def test_create_zone_success(self):
         zone = self.driver.create_zone(zone_id='test.com',
-                extra={'serverip':'127.0.0.1'})
+                                       extra={'serverip': '127.0.0.1'})
 
         self.assertEqual(zone.id, 'test.com')
         self.assertEqual(zone.domain, 'test.com')
@@ -88,7 +89,7 @@ class VultrTests(unittest.TestCase):
 
         try:
             self.driver.create_zone(zone_id='example.com',
-                    extra={'serverip':'127.0.0.1'})
+                                    extra={'serverip': '127.0.0.1'})
         except ZoneAlreadyExistsError:
             e = sys.exc_info()[1]
             self.assertEqual(e.zone_id, 'example.com')
@@ -182,7 +183,8 @@ class VultrMockHttp(MockHttp):
         body = self.fixtures.load('empty_zones_list.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
-    def _v1_dns_list_GET_ZONE_ZONE_DOES_NOT_EXIST(self, method, url, body, headers):
+    def _v1_dns_list_GET_ZONE_ZONE_DOES_NOT_EXIST(self, method, url, body,
+                                                  headers):
         body = self.fixtures.load('list_domains.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
@@ -199,20 +201,20 @@ class VultrMockHttp(MockHttp):
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_list_GET_RECORD(self, method, url, body, headers):
-       body = self.fixtures.load('get_zone.json')
-       return (httplib.OK, body, {}, httplib.responses[httplib.OK])
+        body = self.fixtures.load('get_zone.json')
+        return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_records_GET_RECORD(self, method, url, body, headers):
         body = self.fixtures.load('get_record.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_list_GET_RECORD_RECORD_DOES_NOT_EXIST(self, method, url, body,
-            headers):
+                                                      headers):
         body = self.fixtures.load('get_zone.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_records_GET_RECORD_RECORD_DOES_NOT_EXIST(self, method, url,
-            body, headers):
+                                                         body, headers):
         body = self.fixtures.load('list_records.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
@@ -229,47 +231,49 @@ class VultrMockHttp(MockHttp):
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_list_CREATE_ZONE_ZONE_ALREADY_EXISTS(self, method, url, body,
-            headers):
+                                                     headers):
         body = self.fixtures.load('list_domains.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
-    def _v1_dns_create_domain_CREATE_ZONE_ZONE_ALREADY_EXISTS(self, method, url,
-            body, headers):
+    def _v1_dns_create_domain_CREATE_ZONE_ZONE_ALREADY_EXISTS(self, method,
+                                                              url, body,
+                                                              headers):
         body = ''
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_list_DELETE_ZONE_ZONE_DOES_NOT_EXIST(self, method, url, body,
-            headers):
+                                                     headers):
         body = self.fixtures.load('list_domains.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_delete_domain_DELETE_ZONE_ZONE_DOES_NOT_EXIST(self, method,
-            url, body, headers):
+                                                              url, body,
+                                                              headers):
         body = ''
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
-    def _v1_dns_records_DELETE_RECORD_RECORD_DOES_NOT_EXIST(self,
-            method, url, body, headers):
+    def _v1_dns_records_DELETE_RECORD_RECORD_DOES_NOT_EXIST(self, method, url,
+                                                            body, headers):
         body = self.fixtures.load('list_records.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
-    def _v1_dns_delete_record_DELETE_RECORD_RECORD_DOES_NOT_EXIST(self,
-            method, url, body, headers):
+    def _v1_dns_delete_record_DELETE_RECORD_RECORD_DOES_NOT_EXIST(self, method,
+                                                                  url, body,
+                                                                  headers):
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_list_DELETE_RECORD_RECORD_DOES_NOT_EXIST(self, method, url,
-           body, headers ):
+                                                         body, headers):
         body = self.fixtures.load('test_zone.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
-
     def _v1_dns_list_LIST_RECORDS_ZONE_DOES_NOT_EXIST(self, method, url, body,
-            headers):
+                                                      headers):
         body = self.fixtures.load('list_domains.json')
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
     def _v1_dns_records_LIST_RECORDS_ZONE_DOES_NOT_EXIST(self, method, url,
-            body, headers):
+                                                         body, headers):
         body = ''
         return (httplib.OK, body, {}, httplib.responses[httplib.OK])
 
